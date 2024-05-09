@@ -14,20 +14,21 @@ def create_table(cursor: duckdb.DuckDBPyConnection, tablename: str, filepath: st
     """
     cursor.execute(create_stmt)
     
-def add_moving_average(tablename, days: int):
+def add_moving_average(tablename, input_col, days: int):
     days_in_str = str(days)
-    cursor.execute(f"""ALTER TABLE {tablename} ADD MovingAverage{days_in_str} DOUBLE""")
+    target_col_name = f"{input_col}MA{days_in_str}"
+    cursor.execute(f"""ALTER TABLE {tablename} ADD {target_col_name} DOUBLE""")
     
     moving_average_stmt = f"""WITH cte AS (
                             SELECT Date,
-                            avg(AdjustedClose) OVER(
+                            avg({input_col}) OVER(
                                 ORDER BY Date 
                                 ROWS BETWEEN {days} PRECEDING AND CURRENT ROW) AS average 
                                 FROM {tablename}
                             )
 
                         UPDATE {tablename}
-                        SET MovingAverage{days_in_str} = cte.average
+                        SET {target_col_name} = cte.average
                         FROM cte 
                         WHERE {tablename}.Date = cte.Date;
     """
@@ -38,6 +39,6 @@ if __name__ == '__main__':
     cursor = duckdb.connect()
     tablename = 'eurusd'
     create_table(cursor, tablename, './data/EURUSD-historic.csv')
-    add_moving_average(tablename, 20)
-    add_moving_average(tablename, 30)
+    add_moving_average(tablename, 'AdjustedClose', 20)
+    add_moving_average(tablename, 'AdjustedClose', 30)
     print(cursor.sql(f"SELECT * FROM {tablename} LIMIT 35").df())

@@ -10,4 +10,4 @@ Small experiment with DuckDB and trading data
 - (Suggested) Create and activate virtual environment
 - Install dependencies by running `pip install -r requirements.txt`
 - Download some historic trading data and place it in the `data` dir 
-- Update and execute `fishstick.py`
+- Update tablename and filepath in `fishstick.py` and execute 

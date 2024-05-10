@@ -51,7 +51,7 @@ def add_standard_deviation(tablename: str, input_col: str, days: int, std_col_na
     populate_column_with_rolling_window(tablename, input_col, days, std_col_name, 'STDDEV')
 
 
-def populate_column_with_rolling_window(tablename: str, input_col: str, days: str, target_col: str, action: str):
+def populate_column_with_rolling_window(tablename: str, input_col: str, days: str, target_col: str, action: str) -> None:
     """populate_column_with_rolling_window uses a rolling window to calculate and add a column to an existing table.
 
     Args:

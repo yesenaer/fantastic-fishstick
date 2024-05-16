@@ -10,4 +10,6 @@ Small experiment with DuckDB and trading data
 - (Suggested) Create and activate virtual environment
 - Install dependencies by running `pip install -r requirements.txt`
 - Download some historic trading data and place it in the `data` dir 
+    - for now table columns assume data is from Yahoo Finance
+    - navigate there to get data like the EUR/USD quotes history 
 - Update tablename and filepath in `fishstick.py` and execute 

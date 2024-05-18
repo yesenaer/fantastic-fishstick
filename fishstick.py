@@ -1,6 +1,9 @@
 import duckdb
 import os
 
+import golden
+
+
 def create_table(cursor: duckdb.DuckDBPyConnection, tablename: str, filepath: str) -> None:
     """create_table will generate a table from a file.
 
@@ -34,7 +37,7 @@ def add_moving_average(cursor: duckdb.DuckDBPyConnection, tablename: str, input_
         avg_col_name (str, optional): name of the added average column. Defaults to: '{input_col}MA{days}'.
     """    
     if not avg_col_name:
-        avg_col_name = f"{input_col}MA{str(days)}"
+        avg_col_name = f'{input_col}MA{str(days)}'
     cursor.execute(f"""ALTER TABLE {tablename} ADD {avg_col_name} DOUBLE""")
     populate_column_with_rolling_window(cursor, tablename, input_col, days, avg_col_name, 'AVG')
     
@@ -51,7 +54,7 @@ def add_standard_deviation(cursor: duckdb.DuckDBPyConnection, tablename: str, in
         std_col_name (str, optional): name of the added standard deviation column. Defaults to: '{input_col}STD{days}'.
     """    
     if not std_col_name:
-        std_col_name = f"{input_col}STD{str(days)}"
+        std_col_name = f'{input_col}STD{str(days)}'
     cursor.execute(f"""ALTER TABLE {tablename} ADD {std_col_name} DOUBLE""")
     populate_column_with_rolling_window(cursor, tablename, input_col, days, std_col_name, 'STDDEV')
 
@@ -102,9 +105,9 @@ def write_table_to_file(cursor: duckdb.DuckDBPyConnection, tablename: str, filen
         filename = f'{filename}.{type}'
     
     if type == 'parquet':
-        export_info = "(FORMAT PARQUET)"
+        export_info = """(FORMAT PARQUET)"""
     else:
-        export_info = "(HEADER, DELIMITER ',')"
+        export_info = """(HEADER, DELIMITER ',')"""
 
     stmt = f"""COPY {tablename} TO '{filename}' {export_info};"""
     cursor.execute(stmt)
@@ -113,19 +116,23 @@ def write_table_to_file(cursor: duckdb.DuckDBPyConnection, tablename: str, filen
 if __name__ == '__main__':
     cursor = duckdb.connect()
     tablename = 'eurusd'
+    ticker = 'EURUSD=X'
     table_as_file = f'./data/{tablename}.csv'
 
     if os.path.isfile(table_as_file):
-        print("Reloading table from existing dataset.")
+        print('Reloading table from existing dataset.')
         cursor.execute(f"""CREATE TABLE {tablename} AS SELECT * FROM read_csv('{table_as_file}');""")
     else:
-        print("Creating table from raw data file.")
-        create_table(cursor, tablename, './data/EURUSD-historic.csv')
+        if not os.path.isfile(f'./data/{tablename}-historic.csv'):
+            print('Downloading raw data for table.')
+            golden.retriever(ticker, f'{tablename}-historic.csv', '1y')
+        print('Creating table from raw data file.')
+        create_table(cursor, tablename, f'./data/{tablename}-historic.csv')
 
         for day in [20, 30]:
             add_moving_average(cursor, tablename, 'AdjustedClose', day)
             add_standard_deviation(cursor, tablename, 'AdjustedClose', day)
 
-    print(cursor.sql(f"SELECT * FROM {tablename} LIMIT 35").df())
+    print(cursor.sql(f"""SELECT * FROM {tablename} LIMIT 35""").df())
 
     write_table_to_file(cursor, tablename, table_as_file, 'csv')

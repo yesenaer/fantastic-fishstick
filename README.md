@@ -16,5 +16,9 @@ Small experiment with DuckDB and trading data
 
 ## Download using code 
 
-testing an additional package `yfinance` to see if direct python downloads can be used in future.
-testing is visible in `retrieve.py` 
+Using the package `yfinance` for downloads of historic data, if not yet present.
+Suggest to not download large periods, and store downloads as files to ensure its not done every time.
+
+## Checklist 
+
+Idea is to create a checklist of trading decisions that need to verify the current rate and decide whether it would be a good time to buy or sell. To describe the different metrics used in the checklist, a `docs` directory is created hosting a ChatGPT description of the metric(s).

@@ -1,0 +1,17 @@
+data_directory: &data_dir './data/'
+
+tickers: 
+- display_name: Euro Dollar
+  tablename: eurusd 
+  ticker: EURUSD=X
+  raw_data_location: !join [*data_dir, 'eurusd-historic.csv']
+  backup_location: !join [*data_dir, 'eurusd.csv']
+  checks:
+    - bollinger-bands
+- display_name: Euro Yen
+  tablename: eurjpy 
+  ticker: EURJPY=X
+  raw_data_location: !join [*data_dir, 'eurjpy-historic.csv']
+  backup_location: !join [*data_dir, 'eurjpy.csv']
+  checks:
+    - bollinger-bands

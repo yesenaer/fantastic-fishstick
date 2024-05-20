@@ -2,6 +2,7 @@ import duckdb
 import os
 
 import golden
+from config import load_config
 
 
 def create_table(cursor: duckdb.DuckDBPyConnection, tablename: str, filepath: str) -> None:
@@ -115,24 +116,27 @@ def write_table_to_file(cursor: duckdb.DuckDBPyConnection, tablename: str, filen
 
 if __name__ == '__main__':
     cursor = duckdb.connect()
-    tablename = 'eurusd'
-    ticker = 'EURUSD=X'
-    table_as_file = f'./data/{tablename}.csv'
+    config = load_config()
+    for x in config.get('tickers'):
+        print(f"Processing {x.get('display_name')}.")
+        tablename = x.get('tablename')
+        ticker = x.get('ticker')
+        table_as_file = x.get('backup_location')
 
-    if os.path.isfile(table_as_file):
-        print('Reloading table from existing dataset.')
-        cursor.execute(f"""CREATE TABLE {tablename} AS SELECT * FROM read_csv('{table_as_file}');""")
-    else:
-        if not os.path.isfile(f'./data/{tablename}-historic.csv'):
-            print('Downloading raw data for table.')
-            golden.retriever(ticker, f'{tablename}-historic.csv', '1y')
-        print('Creating table from raw data file.')
-        create_table(cursor, tablename, f'./data/{tablename}-historic.csv')
+        if os.path.isfile(table_as_file):
+            print('Reloading table from existing dataset.')
+            cursor.execute(f"""CREATE TABLE {tablename} AS SELECT * FROM read_csv('{table_as_file}');""")
+        else:
+            if not os.path.isfile(f'./data/{tablename}-historic.csv'):
+                print('Downloading raw data for table.')
+                golden.retriever(ticker, f'{tablename}-historic.csv', '1y')
+            print('Creating table from raw data file.')
+            create_table(cursor, tablename, f'./data/{tablename}-historic.csv')
 
-        for day in [20, 30]:
-            add_moving_average(cursor, tablename, 'AdjustedClose', day)
-            add_standard_deviation(cursor, tablename, 'AdjustedClose', day)
+            for day in [20, 30]:
+                add_moving_average(cursor, tablename, 'AdjustedClose', day)
+                add_standard_deviation(cursor, tablename, 'AdjustedClose', day)
 
-    print(cursor.sql(f"""SELECT * FROM {tablename} LIMIT 35""").df())
+        print(cursor.sql(f"""SELECT * FROM {tablename} LIMIT 35""").df())
 
-    write_table_to_file(cursor, tablename, table_as_file, 'csv')
+        write_table_to_file(cursor, tablename, table_as_file, 'csv')

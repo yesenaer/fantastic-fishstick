@@ -14,6 +14,10 @@ Small experiment with DuckDB and trading data
     - navigate there to get data like the EUR/USD quotes history in csv
 - Update tablename and filepath in `fishstick.py` and execute 
 
+## Config
+
+It is possible to alter the tickers in scope using the config file.
+
 ## Download using code 
 
 Using the package `yfinance` for downloads of historic data, if not yet present.

@@ -2,7 +2,7 @@ import duckdb
 import os
 
 import golden
-from config import load_config
+from config import load_config, ROOT
 
 
 def create_table(cursor: duckdb.DuckDBPyConnection, tablename: str, filepath: str) -> None:
@@ -127,11 +127,11 @@ if __name__ == '__main__':
             print('Reloading table from existing dataset.')
             cursor.execute(f"""CREATE TABLE {tablename} AS SELECT * FROM read_csv('{table_as_file}');""")
         else:
-            if not os.path.isfile(f'./data/{tablename}-historic.csv'):
+            if not os.path.isfile(f'{ROOT}/data/{tablename}-historic.csv'):
                 print('Downloading raw data for table.')
                 golden.retriever(ticker, f'{tablename}-historic.csv', '1y')
             print('Creating table from raw data file.')
-            create_table(cursor, tablename, f'./data/{tablename}-historic.csv')
+            create_table(cursor, tablename, f'{ROOT}/data/{tablename}-historic.csv')
 
             for day in [20, 30]:
                 add_moving_average(cursor, tablename, 'AdjustedClose', day)

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fantastic-fishstick"
+version = "0.0.1"
+description = "Financial Data Experiment"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["fantastic", "fishstick", "financial", "experiment"]
+authors = [
+    {email = "meervoud.globes-0r@icloud.com"},
+    {name = "yesenaer"}
+]
+classifiers = [
+  "Programming Language :: Python"
+]
+dependencies = ["duckdb", "yfinance", "pandas", "numpy", "pyyaml"]
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "pytest-cov[all]"
+]
+
+[project.urls]
+repository = "https://github.com/yesenaer/fantastic-fishstick"
+
+[options]
+python_requires = ">=3.11"
+
+[tool.pytest.ini_options]
+minversion = 7.0
+pythonpath = "src"
